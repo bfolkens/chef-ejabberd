@@ -7,6 +7,7 @@ end
 
 template "/etc/ejabberd/ejabberd.cfg" do
   source "ejabberd.cfg.erb"
+  owner "ejabberd"
   variables(:jabber_domain => node[:jabber_domain])
   notifies :restart, resources(:service => "ejabberd")
 end
@@ -18,3 +19,10 @@ end
 service "ejabberd" do
   action :start
 end
+
+package "nginx"
+
+service "nginx" do
+  action :start
+end
+

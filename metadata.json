@@ -20,17 +20,17 @@
   },
   "description": "Configures ejabberd",
   "providing": {
-    "ejabberd": [
+    "jabber": [
 
     ]
   },
-  "name": "ejabberd",
+  "name": "jabber",
   "attributes": {
 
   },
   "long_description": "",
   "recipes": {
-    "ejabberd": ""
+    "jabber": ""
   },
   "replacing": {
 
