@@ -73,7 +73,12 @@
 %%{domain_certfile, "example.com", "/path/to/example_com.pem"}.
 
 
-{auth_method, internal}.
+{auth_method, odbc}.
+
+%%
+%% MySQL server:
+%%
+{odbc_server, {mysql, "<%= @mysql_hostname %>", "<%= @mysql_databasename %>", "<%= @mysql_username %>", "<%= @mysql_password %>"}}.
 
 
 %%
@@ -161,7 +166,7 @@
   {mod_disco,    []},
   %%{mod_echo,   [{host, "echo.localhost"}]},
   {mod_irc,      []},
-  {mod_last,     []},
+  {mod_last_odbc,     []},
   {mod_muc,      [
       %%{host, "conference.@HOST@"},
       {access, muc},
@@ -171,9 +176,9 @@
       {max_users, 500}
      ]},
   %%{mod_muc_log,[]},
-  {mod_offline,  []},
-  {mod_privacy,  []},
-  {mod_private,  []},
+  {mod_offline_odbc,  []},
+  {mod_privacy_odbc,  []},
+  {mod_private_odbc,  []},
   {mod_proxy65,  [
       {access, local},
       {shaper, c2s_shaper}
@@ -182,12 +187,12 @@
       {access_createnode, pubsub_createnode},
       {plugins, ["default", "pep"]}
      ]},
-  {mod_roster,   []},
+  {mod_roster_odbc,   []},
   %%{mod_service_log,[]},
   %%{mod_shared_roster,[]},
   {mod_stats,    []},
   {mod_time,     []},
-  {mod_vcard,    []},
+  {mod_vcard_odbc,    []},
   {mod_version,  []}
  ]}.
 
