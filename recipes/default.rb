@@ -1,5 +1,6 @@
-#package "ejabberd"
-%w{build-essential m4 libncurses5-dev libssh-dev unixodbc-dev libgmp3-dev libwxgtk2.8-dev libglu1-mesa-dev fop xsltproc default-jdk}.each do |pkg|
+package "ejabberd"
+
+%w{build-essential m4 libncurses5-dev libssh-dev unixodbc-dev libgmp3-dev libwxgtk2.8-dev libglu1-mesa-dev fop xsltproc default-jdk libexpat1-dev}.each do |pkg|
   package pkg do
     action :install
   end
@@ -15,11 +16,13 @@ bash "compile ejabberd" do
     cd otp_src_R16B
     ./configure --prefix=/usr && make && make install
 
+    cd ~/
     git clone git://github.com/rebar/rebar.git
     cd rebar/
     ./bootstrap
     cp rebar /usr/bin/
 
+    cd ~/
     git clone git://git.process-one.net/ejabberd/mainline.git ejabberd
     cd ejabberd
     git checkout -b 2.1.x origin/2.1.x
@@ -27,12 +30,12 @@ bash "compile ejabberd" do
     ./configure --enable-odbc --prefix=/usr --enable-user=ejabberd --sysconfdir=/etc --localstatedir=/var --libdir=/usr/lib
     make install
 
+    cd ~/
     git clone https://github.com/processone/mysql
     cd mysql/
     make
     cp ebin/* /usr/lib/ejabberd/ebin/
   EOH
-  not_if { ::File.exists?('/usr/sbin/ejabberd') }
 end
 
 template "/etc/init.d/ejabberd" do
