@@ -1,8 +1,45 @@
-package "ejabberd"
+#package "ejabberd"
+%w{build-essential m4 libncurses5-dev libssh-dev unixodbc-dev libgmp3-dev libwxgtk2.8-dev libglu1-mesa-dev fop xsltproc default-jdk}.each do |pkg|
+  package pkg do
+    action :install
+  end
+end
 
-service "ejabberd" do
-  action :enable
-  supports :restart => true
+bash "compile ejabberd" do
+  code <<-EOH
+    mkdir -p /src/erlang
+    cd /src/erlang
+    wget http://www.erlang.org/download/otp_src_R16B.tar.gz
+    tar -xvzf otp_src_R16B.tar.gz
+    chmod -R 777 otp_src_R16B
+    cd otp_src_R16B
+    ./configure --prefix=/usr && make && make install
+
+    git clone git://github.com/rebar/rebar.git
+    cd rebar/
+    ./bootstrap
+    cp rebar /usr/bin/
+
+    git clone git://git.process-one.net/ejabberd/mainline.git ejabberd
+    cd ejabberd
+    git checkout -b 2.1.x origin/2.1.x
+    cd src
+    ./configure --enable-odbc --prefix=/usr --enable-user=ejabberd --sysconfdir=/etc --localstatedir=/var --libdir=/usr/lib
+    make install
+
+    git clone https://github.com/processone/mysql
+    cd mysql/
+    make
+    cp ebin/* /usr/lib/ejabberd/ebin/
+  EOH
+  not_if { ::File.exists?('/usr/sbin/ejabberd') }
+end
+
+template "/etc/init.d/ejabberd" do
+  owner 'root'
+  group 'root'
+  mode 0755
+  source "init.d/ejabberd.erb"
 end
 
 template "/etc/ejabberd/ejabberd.cfg" do
@@ -15,16 +52,21 @@ template "/etc/ejabberd/ejabberd.cfg" do
     :mysql_username => node[:mysql_username],
     :mysql_password => node[:mysql_password]
   })
-  notifies :restart, resources(:service => "ejabberd")
+end
+
+template "/etc/ejabberd/ejabberdctl.cfg" do
+  source "ejabberdctl.cfg.erb"
+  owner "ejabberd"
+end
+
+template "/etc/ejabberd/inetrc" do
+  source "inetrc.erb"
+  owner "ejabberd"
 end
 
 # execute "add ejabberd admin user" do
 #   command "ejabberdctl register admin #{node[:base][:jabber_domain]} #{node[:base][:jabber_admin_password]}"
 # end
-
-service "ejabberd" do
-  action :start
-end
 
 package "nginx"
 
@@ -32,3 +74,7 @@ service "nginx" do
   action :start
 end
 
+service "ejabberd" do
+  action :enable
+  supports :restart => true
+end
