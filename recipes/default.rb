@@ -112,6 +112,15 @@ service "nginx" do
   action :start
 end
 
+cookbook_file "ejabberd.example.pem" do
+  path "/etc/ejabberd/ejabberd.pem"
+  owner "ejabberd"
+  group "ejabberd"
+  mode "600"
+  action :create
+end
+
+
 service "ejabberd" do
   action :enable
   supports :restart => true
