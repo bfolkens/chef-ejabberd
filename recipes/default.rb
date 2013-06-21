@@ -1,6 +1,6 @@
 package "ejabberd"
 
-%w{build-essential m4 libncurses5-dev libssh-dev unixodbc-dev libgmp3-dev libwxgtk2.8-dev libglu1-mesa-dev fop xsltproc default-jdk libexpat1-dev}.each do |pkg|
+%w{build-essential m4 libncurses5-dev libssh-dev unixodbc-dev libgmp3-dev libwxgtk2.8-dev libglu1-mesa-dev fop xsltproc default-jdk libexpat1-dev libxml2-utils}.each do |pkg|
   package pkg do
     action :install
   end
