@@ -36,6 +36,11 @@ bash "install rebar" do
   EOH
 end
 
+group 'ejabberd'
+user 'ejabberd' do
+  group 'ejabberd'
+end
+
 bash "compile ejabberd" do
   code <<-EOH
     cd ~/
