@@ -72,11 +72,11 @@ template "/etc/ejabberd/ejabberd.cfg" do
   source "ejabberd.cfg.erb"
   owner "ejabberd"
   variables({
-    :jabber_domain => node[:jabber_domain],
-    :mysql_hostname => node[:mysql_hostname],
+    :jabber_domain      => node[:jabber_domain],
+    :mysql_hostname     => node[:mysql_hostname],
     :mysql_databasename => node[:mysql_databasename],
-    :mysql_username => node[:mysql_username],
-    :mysql_password => node[:mysql_password]
+    :mysql_username     => node[:mysql_username],
+    :mysql_password     => node[:mysql_password]
   })
 end
 
