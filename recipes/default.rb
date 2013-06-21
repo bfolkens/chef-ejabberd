@@ -10,7 +10,6 @@ end
 
 dpkg_package "erlang" do
   source "#{Chef::Config[:file_cache_path]}/esl-erlang_16.b-2~ubuntu~precise_amd64.deb"
-  action :create_if_missing
 end
 
 bash "install rebar" do
