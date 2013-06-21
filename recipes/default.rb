@@ -45,6 +45,16 @@ bash "install ejabberd mysql" do
   EOH
 end
 
+bash "install mod_admin_extra" do
+  code <<-EOH
+    git clone git://github.com/processone/ejabberd-contrib.git
+    git checkout 2.1.x
+    cd ejabberd-contrib/mod_admin_extra/
+    ./build.sh
+    cp ebin/* /usr/lib/ejabberd/ebin
+  EOH
+end
+
 template "/etc/init.d/ejabberd" do
   owner 'root'
   group 'root'
