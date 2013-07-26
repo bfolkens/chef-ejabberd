@@ -1,17 +1,23 @@
-# TODO: remove the unnecessary items from here
-%w{build-essential m4 libncurses5-dev libssh-dev unixodbc-dev libgmp3-dev libwxgtk2.8-dev libglu1-mesa-dev fop xsltproc default-jdk libexpat1-dev libxml2-utils git-core}.each do |pkg|
-  package pkg do
-    action :install
-  end
+bash "add erlang source to apt sources" do
+  code <<-EOH
+    echo 'deb http://binaries.erlang-solutions.com/debian precise contrib' >> /etc/apt/sources.list
+    wget -O - http://binaries.erlang-solutions.com/debian/erlang_solutions.asc | apt-key add -
+  EOH
+  not_if "grep asdfsdf /etc/apt/sources.list"
 end
 
-remote_file "#{Chef::Config[:file_cache_path]}/esl-erlang_16.b-2~ubuntu~precise_amd64.deb" do
-  source "https://elearning.erlang-solutions.com/couchdb//rbingen_adapter//package_R16B_precise64_1361901944/esl-erlang_16.b-2~ubuntu~precise_amd64.deb"
-  action :create_if_missing
+bash "update apt" do
+  code "apt-get update"
 end
 
-dpkg_package "erlang" do
-  source "#{Chef::Config[:file_cache_path]}/esl-erlang_16.b-2~ubuntu~precise_amd64.deb"
+package "esl-erlang" do
+  action :install
+end
+
+
+
+package "git-core" do
+  action :install
 end
 
 bash "install rebar" do
@@ -24,15 +30,28 @@ bash "install rebar" do
   EOH
 end
 
+
+
 group 'ejabberd'
 user 'ejabberd' do
   group 'ejabberd'
 end
 
+[
+  "build-essential",
+  "libssl-dev",
+  "libexpat1-dev",
+  "zlib1g-dev",
+].each do |pkg|
+  package pkg do
+    action :install
+  end
+end
+
 bash "compile ejabberd" do
   code <<-EOH
     cd ~/
-    git clone git://git.process-one.net/ejabberd/mainline.git ejabberd
+    git clone https://github.com/processone/ejabberd.git ejabberd
     cd ejabberd
     git checkout -b 2.1.x origin/2.1.x
     cd src
@@ -40,6 +59,9 @@ bash "compile ejabberd" do
     make install
   EOH
 end
+
+
+
 
 bash "install ejabberd mysql" do
   code <<-EOH
@@ -51,15 +73,23 @@ bash "install ejabberd mysql" do
   EOH
 end
 
+
+
+
 bash "install mod_admin_extra" do
   code <<-EOH
+    cd ~
     git clone git://github.com/processone/ejabberd-contrib.git
+    cd ejabberd-contrib
     git checkout 2.1.x
-    cd ejabberd-contrib/mod_admin_extra/
+    cd mod_admin_extra
     ./build.sh
     cp ebin/* /usr/lib/ejabberd/ebin
   EOH
 end
+
+
+
 
 template "/etc/init.d/ejabberd" do
   owner 'root'
@@ -89,10 +119,6 @@ template "/etc/ejabberd/inetrc" do
   source "inetrc.erb"
   owner "ejabberd"
 end
-
-# execute "add ejabberd admin user" do
-#   command "ejabberdctl register admin #{node[:base][:jabber_domain]} #{node[:base][:jabber_admin_password]}"
-# end
 
 package "nginx"
 
