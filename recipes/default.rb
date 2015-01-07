@@ -54,7 +54,7 @@ bash "compile ejabberd" do
     git clone https://github.com/processone/ejabberd.git ejabberd
     cd ejabberd
     git checkout tags/#{node[:git_checkout_tag]}
-    cd src
+		./autogen.sh
     ./configure --enable-odbc --prefix=/usr --enable-user=ejabberd --sysconfdir=/etc --localstatedir=/var --libdir=/usr/lib
     make install
   EOH
