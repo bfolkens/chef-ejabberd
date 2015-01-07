@@ -58,6 +58,8 @@ bash "compile ejabberd" do
     git checkout tags/#{node[:git_checkout_tag]}
 		./autogen.sh
     ./configure --enable-odbc --prefix=/usr --enable-user=ejabberd --sysconfdir=/etc --localstatedir=/var --libdir=/usr/lib
+		make
+		make doc
     make install
   EOH
 end
