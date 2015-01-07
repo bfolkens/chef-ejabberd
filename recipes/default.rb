@@ -39,6 +39,8 @@ end
 
 [
   "build-essential",
+	"autoconf",
+	"libyaml-dev",
   "libssl-dev",
   "libexpat1-dev",
   "zlib1g-dev",
@@ -82,7 +84,7 @@ bash "install mod_admin_extra" do
     cd ~
     git clone git://github.com/processone/ejabberd-contrib.git
     cd ejabberd-contrib
-    git checkout 2.1.x
+    git checkout tags/#{node[:git_checkout_tag]}
     cd mod_admin_extra
     ./build.sh
     cp ebin/* /usr/lib/ejabberd/ebin
