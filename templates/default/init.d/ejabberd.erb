@@ -1,7 +1,4 @@
 #! /bin/sh
-#
-# ejabberd        Start/stop ejabberd server
-#
 
 ### BEGIN INIT INFO
 # Provides:          ejabberd
@@ -13,138 +10,54 @@
 # Description:       Starts ejabberd jabber server, an XMPP
 #                    compliant server written in Erlang.
 ### END INIT INFO
-set -x
 
-PATH=/sbin:/bin:/usr/sbin:/usr/bin
-EJABBERD=/usr/sbin/ejabberd
-EJABBERDCTL=/usr/sbin/ejabberdctl
-EJABBERDRUN=/var/run/ejabberd
-EJABBERDUSER=ejabberd
-NAME=ejabberd
+# chkconfig: 2345 90 10
+# description: ejabberd XMPP server
 
-test -f $EJABBERD || exit 0
-test -f $EJABBERDCTL || exit 0
+set -o errexit
 
-# Include ejabberd defaults if available
-if [ -f /etc/default/ejabberd ] ; then
-    . /etc/default/ejabberd
-fi
+DIR=/usr/sbin
+CTL="$DIR"/ejabberdctl
+USER=ejabberd
 
-ctl()
-{
-    action="$1"
-    su $EJABBERDUSER -c "$EJABBERDCTL $action" >/dev/null
+test -x "$CTL" || {
+	echo "ERROR: ejabberd not found: $DIR"
+	exit 1
+}
+getent passwd "$USER" >/dev/null || {
+	echo "ERROR: System user not found: $USER"
+	exit 2
 }
 
-mkrundir()
-{
-    if [ ! -d $EJABBERDRUN ]; then
-        mkdir -p $EJABBERDRUN
-        if [ $? -ne 0 ]; then
-            echo -n " failed"
-            return
-        fi
-        chmod 0755 $EJABBERDRUN
-        chown ejabberd:ejabberd $EJABBERDRUN
-    fi
-}
-
-start()
-{
-    mkrundir
-
-    cd /var/lib/ejabberd
-    su $EJABBERDUSER -c "$EJABBERD -noshell -detached"
-
-    cnt=0
-    while ! (ctl status || test $? = 1) ; do
-	echo -n .
-	cnt=`expr $cnt + 1`
-	if [ $cnt -ge 60 ] ; then
-	    echo -n " failed"
-	    break
-	fi
-	sleep 1
-    done
-}
-
-stop()
-{
-    if ctl stop ; then
-	cnt=0
-	sleep 1
-	while ctl status || test $? = 1 ; do
-	    echo -n .
-	    cnt=`expr $cnt + 1`
-	    if [ $cnt -ge 60 ] ; then
-		echo -n " failed"
-		break
-	    fi
-	    sleep 1
-	done
-    else
-	echo -n " failed"
-    fi
-}
-
-live()
-{
-    mkrundir
-
-    echo '*******************************************************'
-    echo '* To quit, press Ctrl-g then enter q and press Return *'
-    echo '*******************************************************'
-    echo
-
-    cd /var/lib/ejabberd
-    exec su $EJABBERDUSER -c "$EJABBERD"
-}
+export PATH="${PATH:+$PATH:}/usr/sbin:/sbin"
 
 case "$1" in
-    start)
-	echo -n "Starting jabber server: $NAME"
-	if ctl status ; then
-	    echo -n " already running"
-	else
-	    start
-	fi
+  start)
+    test -x "$CTL" || exit 0
+    echo "Starting ejabberd..."
+    su - $USER -c "$CTL start"
+    su - $USER -c "$CTL started"
+    echo "done."
     ;;
-    stop)
-	echo -n "Stopping jabber server: $NAME"
-	if ctl status ; then
-	    stop
-	else
-	    echo -n " already stopped"
-	fi
+  stop)
+    test -x "$CTL" || exit 0
+    echo "Stopping ejabberd..."
+    su - $USER -c "$CTL stop"
+    su - $USER -c "$CTL stopped"
+    echo "done."
     ;;
-    restart|force-reload)
-	echo -n "Restarting jabber server: $NAME"
-	if ctl status ; then
-	    stop
-	    start
-	else
-	    echo -n " is not running. Starting $NAME"
-	    start
-	fi
+  status)
+    test -x "$CTL" || exit 0
+    echo "Getting ejabberd status..."
+    su - $USER -c "$CTL status"
     ;;
-    live)
-	if ctl status ; then
-	    echo -n "ejabberd is already running"
-	else
-	    live
-	fi
+  force-reload|restart)
+    "$0" stop
+    "$0" start
     ;;
-    *)
-	echo "Usage: $0 {start|stop|restart|force-reload|live}" >&2
-	exit 1
-    ;;
+  *)
+    echo "Usage: $0 {start|stop|restart|force-reload|status}"
+    exit 1
 esac
 
-if [ $? -eq 0 ]; then
-    echo .
-else
-    echo " failed."
-fi
-
 exit 0
-
