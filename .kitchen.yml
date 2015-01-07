@@ -1,0 +1,21 @@
+---
+driver:  
+  name: vagrant
+
+provisioner:  
+  name: chef_solo
+
+platforms:  
+  - name: ubuntu-14.04
+
+suites:  
+  - name: default
+    run_list:
+      - recipe[jabber::default]
+    attributes:
+      git_checkout_tag: 14.12
+      jabber_domain: hello
+      mysql_hostname: localhost
+      mysql_databasename: ejabberd
+      mysql_username: root
+      mysql_password: 
