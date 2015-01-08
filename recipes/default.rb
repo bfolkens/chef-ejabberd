@@ -103,10 +103,11 @@ template "/etc/init.d/ejabberd" do
   source "init.d/ejabberd.erb"
 end
 
-template "/etc/ejabberd/ejabberd.cfg" do
-  source "ejabberd.cfg.erb"
+template "/etc/ejabberd/ejabberd.yml" do
+  source "ejabberd.yml.erb"
   owner "ejabberd"
   variables({
+    :jabber_hosts       => node[:jabber_hosts],
     :jabber_domain      => node[:jabber_domain],
     :mysql_hostname     => node[:mysql_hostname],
     :mysql_databasename => node[:mysql_databasename],

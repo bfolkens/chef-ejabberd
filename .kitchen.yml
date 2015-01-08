@@ -15,6 +15,9 @@ suites:
     attributes:
       git_checkout_tag: 14.12
       jabber_domain: hello
+      jabber_hosts:
+        - "xmpp01"
+        - "xmpp01.hello.com"
       mysql_hostname: localhost
       mysql_databasename: ejabberd
       mysql_username: root
