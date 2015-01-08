@@ -59,7 +59,7 @@ bash "compile ejabberd" do
     cd ejabberd
     git checkout tags/#{node[:git_checkout_tag]}
 		./autogen.sh
-    ./configure --enable-odbc --prefix=/usr --enable-user=ejabberd --sysconfdir=/etc --localstatedir=/var --libdir=/usr/lib
+    ./configure --enable-mysql --prefix=/usr --enable-user=ejabberd --sysconfdir=/etc --localstatedir=/var --libdir=/usr/lib
 		make
 		make doc
     make install
