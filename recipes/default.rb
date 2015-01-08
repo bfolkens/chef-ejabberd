@@ -35,6 +35,8 @@ end
 group 'ejabberd'
 user 'ejabberd' do
   group 'ejabberd'
+	supports :manage_home => true
+	home '/home/ejabberd'
 end
 
 [
@@ -142,6 +144,6 @@ end
 
 
 service "ejabberd" do
-  action :enable
+  action [:enable, :start]
   supports :restart => true
 end
