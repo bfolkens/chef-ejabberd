@@ -162,6 +162,9 @@ end
 
 template '/usr/local/src/ejabberd-contrib/mod_zeropush/Emakefile' do
   source 'mod_zeropush-Emakefile.erb'
+  variables({
+    :zeropush_token => node[:zeropush_token]
+	})
 end
 
 bash "install mod_zeropush" do

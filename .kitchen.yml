@@ -18,6 +18,7 @@ suites:
       jabber_hosts:
         - "xmpp01"
         - "xmpp01.hello.com"
+      zeropush_token: iosdev_xyzABCxyzxyzABCABC123
       mysql_hostname: localhost
       mysql_databasename: ejabberd
       mysql_username: root
