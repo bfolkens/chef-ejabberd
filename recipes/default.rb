@@ -20,11 +20,14 @@ package "git-core" do
   action :install
 end
 
+
+git '/usr/local/src/rebar' do
+  repository 'git://github.com/rebar/rebar.git'
+end
+
 bash "install rebar" do
   code <<-EOH
-    cd ~/
-    git clone git://github.com/rebar/rebar.git
-    cd rebar/
+    cd /usr/local/src/rebar
     ./bootstrap
     cp rebar /usr/bin/
   EOH
@@ -52,12 +55,14 @@ end
   end
 end
 
+git '/usr/local/src/ejabberd' do
+  repository 'https://github.com/processone/ejabberd.git'
+	reference "#{node[:git_checkout_tag]}"
+end
+
 bash "compile ejabberd" do
   code <<-EOH
-    cd ~/
-    git clone https://github.com/processone/ejabberd.git ejabberd
-    cd ejabberd
-    git checkout tags/#{node[:git_checkout_tag]}
+    cd /usr/local/src/ejabberd
 		./autogen.sh
     ./configure --enable-mysql --prefix=/usr --enable-user=ejabberd --sysconfdir=/etc --localstatedir=/var --libdir=/usr/lib
 		make
@@ -66,30 +71,35 @@ bash "compile ejabberd" do
   EOH
 end
 
-
-
+git '/usr/local/src/p1_mysql' do
+  repository 'https://github.com/processone/mysql'
+	reference '42e8d4c2c38e32358235fe42136c6433fa5aa83e'
+end
 
 bash "install ejabberd mysql" do
   code <<-EOH
-    cd ~/
-    git clone https://github.com/processone/mysql
-    cd mysql/
-    git checkout -b pre_p1 42e8d4c2c38e32358235fe42136c6433fa5aa83e
+    cd /usr/local/src/p1_mysql
     make
     cp ebin/* /usr/lib/ejabberd/ebin/
   EOH
 end
 
+bash "get and build rebar deps" do
+	code <<-EOH
+	  cd /usr/local/src/ejabberd
+		./rebar get-deps
+		./rebar compile
+		cp -R deps/* /usr/lib/ejabberd/include/
+	EOH
+end
 
-
+git '/usr/local/src/ejabberd-contrib' do
+  repository 'git://github.com/processone/ejabberd-contrib.git'
+end
 
 bash "install mod_admin_extra" do
   code <<-EOH
-    cd ~
-    git clone git://github.com/processone/ejabberd-contrib.git
-    cd ejabberd-contrib
-    git checkout tags/#{node[:git_checkout_tag]}
-    cd mod_admin_extra
+    cd /usr/local/src/ejabberd-contrib/mod_admin_extra
     ./build.sh
     cp ebin/* /usr/lib/ejabberd/ebin
   EOH
@@ -143,7 +153,30 @@ cookbook_file "ejabberd.example.pem" do
 end
 
 
+# mod_zeropush
+
+git '/usr/local/src/ejabberd-contrib/mod_zeropush' do
+  repository 'https://github.com/ZeroPush/mod_zeropush.git'
+	reference "v#{node[:git_checkout_tag]}"
+end
+
+template '/usr/local/src/ejabberd-contrib/mod_zeropush/Emakefile' do
+  source 'mod_zeropush-Emakefile.erb'
+end
+
+bash "install mod_zeropush" do
+  code <<-EOH
+	  cd /usr/local/src/ejabberd-contrib/mod_zeropush
+		./build.sh
+    cp ebin/* /usr/lib/ejabberd/ebin
+	EOH
+end
+
+# end mod_zeropush
+
+
 service "ejabberd" do
   action [:enable, :start]
   supports :restart => true
 end
+
